@@ -1,5 +1,6 @@
 const errors = require("../middleware/errors")
 const neo = require('../../neo')
+const uuid = require('uuid');
 
 // the schema is supplied by injection
 class UserCrudController {
@@ -200,7 +201,7 @@ class UserCrudController {
         }
     }
 
-    //TODO comments toevoegen
+
 
     getFriends = async (req, res, next) => {
         try {
@@ -298,6 +299,128 @@ class UserCrudController {
         } catch (err) {
             console.log(err);
             res.status(500).json({ error: true, message: 'Internal Server Error' });
+        }
+    }
+
+
+    // Add a comment to a festival
+    addComment = async (req, res, next) => {
+        try {
+            const session = neo.session();
+
+            // find the current user
+            const currentUser = await this.model.findById(req.user._id);
+            const festivalId = req.params.festivalId
+            const commentText = req.body.comment
+            const commentId = uuid.v4();
+
+            // Open a Neo session
+
+            // Create a new comment node and link it to the festival and user nodes
+            const result = await session.run(`
+            MATCH (f:Festival)
+            WHERE f.id = $festivalId
+            CREATE (c:Comment { id: $commentId, text: $commentText, createdAt: timestamp() })
+            CREATE (c)-[:COMMENTED_ON]->(f)
+            CREATE (c)-[:POSTED_BY]->(u:User { email: $email })
+            RETURN c
+        `, {
+                festivalId: festivalId.toString(),
+                commentText: commentText.toString(),
+                email: currentUser.email.toString(),
+                commentId: commentId.toString(),
+            })
+
+            // Close the Neo session
+            session.close()
+
+            // Send a response indicating that the comment was added successfully
+            res.status(200).json({
+                error: false,
+                message: "Comment added successfully",
+                comment: result.records[0].get("c").properties,
+            })
+        } catch (err) {
+            console.log(err)
+            res.status(500).json({ error: true, message: "Internal Server Error" })
+        }
+    }
+
+    // Add a reply to a comment
+    addReply = async (req, res, next) => {
+        try {
+            const currentUser = await this.model.findById(req.user._id)
+            const commentId = req.params.commentId
+            const replyText = req.body.reply
+
+            // Open a Neo session
+            const session = neo.session()
+
+            // Create a new reply node and link it to the comment and user nodes
+            const result = await session.run(`
+            MATCH (c:Comment)
+            WHERE c.id = $commentId
+            CREATE (r:Reply { text: $replyText, createdAt: timestamp() })
+            CREATE (r)-[:REPLIED_TO]->(c)
+            CREATE (r)-[:POSTED_BY]->(u:User { email: $email })
+            RETURN r
+        `, {
+                commentId: commentId.toString(),
+                replyText: replyText.toString(),
+                email: currentUser.email.toString(),
+            })
+
+            // Close the Neo session
+            session.close()
+
+            // Send a response indicating that the reply was added successfully
+            res.status(200).json({
+                error: false,
+                message: "Reply added successfully",
+                reply: result.records[0].get("r").properties,
+            })
+        } catch (err) {
+            console.log(err)
+            res.status(500).json({ error: true, message: "Internal Server Error" })
+        }
+    }
+
+    getAllCommentsWithReplies = async (req, res, next) => {
+        try {
+            const session = neo.session();
+
+            const festivalId = req.params.festivalId;
+
+            // Get all comments on the festival and their corresponding replies
+            const result = await session.run(`
+            MATCH (f:Festival)
+            WHERE f.id = $festivalId
+            OPTIONAL MATCH (c:Comment)-[:COMMENTED_ON]->(f)
+            OPTIONAL MATCH (c)-[:REPLIED_TO]->(parent)
+            OPTIONAL MATCH (reply:Reply)-[:REPLIED_TO]->(c)
+            RETURN c, COLLECT(reply) AS replies
+            `, {
+                festivalId: festivalId.toString(),
+            })
+
+            // Close the Neo session
+            session.close()
+
+            // Format the result into an array of comments with their replies
+            const comments = result.records.map(record => {
+                const comment = record.get("c").properties;
+                const replies = record.get("replies").map(reply => reply.properties);
+                return { ...comment, replies };
+            });
+
+            // Send a response with the formatted comments
+            res.status(200).json({
+                error: false,
+                comments,
+            })
+        } catch (err) {
+            console.log(err)
+            res.status(500).json({ error: true, message: "Internal Server Error" })
         }
     }
 
