@@ -16,13 +16,8 @@ class FestivalCrudController {
         console.log(entity);
 
         // Create a festival node in Neo4j
-        const neoQuery = `
-            CREATE (f:Festival {
-                id: $id,
-                Naam: $Naam
-            })
-            RETURN f.id AS id
-        `;
+        //TODO test
+        const neoQuery = neo.createFestival
         const neoParams = {
             Naam: entity.Naam,
             id: entity.id
@@ -40,6 +35,47 @@ class FestivalCrudController {
         res.status(201).json({ id: entity.id });
     }
 
+    // Methode om festivals op te halen op basis van een datumbereik
+    getFestivalsByDateRange = async (req, res, next) => {
+        const { start, end } = req.query;
+
+        try {
+            const festivals = await this.model.find({
+                Date: {
+                    $lt: new Date(end),
+                    $gt: new Date(start)
+                }
+            });
+
+            res.status(200).json(festivals);
+        } catch (error) {
+            next(errors.internalServerError(error));
+        }
+    }
+
+    // Zoekt festivals met een datum voor de opgegeven datum
+    getFestivalsBeforeDate = async (req, res, next) => {
+        try {
+            const { date } = req.query;
+            const filter = { Date: { $lt: new Date(date) } };
+            const festivals = await this.model.find(filter);
+            res.json(festivals);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // Zoekt festivals met een datum na de opgegeven datum
+    getFestivalsAfterDate = async (req, res, next) => {
+        try {
+            const { date } = req.query;
+            const filter = { Date: { $gt: new Date(date) } };
+            const festivals = await this.model.find(filter);
+            res.json(festivals);
+        } catch (error) {
+            next(error);
+        }
+    }
 
 }
 

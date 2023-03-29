@@ -10,7 +10,6 @@ class CrudController {
 
     // we HAVE to use lambda functions here, as they have
     // lexical scope for 'this'
-    //TODO change success message
     create = async (req, res, next) => {
         console.log(req.body);
         const entity = new this.model(req.body)

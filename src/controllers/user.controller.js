@@ -18,12 +18,8 @@ class UserCrudController {
             const session = neo.session()
 
             // create a new friend request relationship between existing nodes
-            const result = await session.run(`
-                MATCH (sender:User { email: $senderEmail })
-                MATCH (receiver:User { email: $receiverEmail })
-                CREATE (sender)-[:REQUESTED_FRIEND { status: 'pending' }]->(receiver)
-                RETURN sender, receiver
-            `, {
+            //TODO test
+            const result = await session.run(neo.addFriend, {
                 senderEmail: sender.email.toString(),
                 receiverEmail: receiverEmail.toString(),
             })
@@ -64,15 +60,7 @@ class UserCrudController {
             const session = neo.session()
 
             // update the friend request status to "accepted"
-            const result = await session.run(`
-                MATCH (sender:User { email: $senderEmail })
-                MATCH (receiver:User { email: $receiverEmail })
-                MATCH (sender)-[r:REQUESTED_FRIEND]->(receiver)
-                SET r.status = 'accepted'
-                CREATE (sender)-[:FRIENDS { since: date() }]->(receiver)
-                CREATE (receiver)-[:FRIENDS { since: date() }]->(sender)
-                RETURN count(r) as rowsChanged
-            `, {
+            const result = await session.run(neo.acceptFriend, {
                 senderEmail: senderEmail.toString(),
                 receiverEmail: receiver.email.toString(),
             })
@@ -110,12 +98,8 @@ class UserCrudController {
             const session = neo.session()
 
             // check if the relationship already exists
-            const result = await session.run(`
-            MATCH (follower:User { email: $followerEmail })
-            MATCH (followee:User { email: $followeeEmail })
-            MATCH (follower)-[r:FOLLOWS]->(followee)
-            RETURN COUNT(r) AS relationshipCount
-          `, {
+            //TODO test
+            const result = await session.run(neo.followFriend, {
                 followerEmail: follower.email.toString(),
                 followeeEmail: followeeEmail.toString(),
             })
@@ -135,11 +119,8 @@ class UserCrudController {
             }
 
             // create a new follows relationship between existing nodes
-            await session.run(`
-            MATCH (follower:User { email: $followerEmail })
-            MATCH (followee:User { email: $followeeEmail })
-            CREATE (follower)-[:FOLLOWS]->(followee)
-          `, {
+            //todo test
+            await session.run(neo.followee, {
                 followerEmail: follower.email.toString(),
                 followeeEmail: followeeEmail.toString(),
             })
@@ -170,11 +151,7 @@ class UserCrudController {
             const session = neo.session();
 
             // delete the FOLLOWS relationship between the users
-            const result = await session.run(`
-            MATCH (follower:User { email: $followerEmail })-[r:FOLLOWS]->(followee:User { email: $followeeEmail })
-            DELETE r
-            RETURN count(r)
-          `, {
+            const result = await session.run(neo.unfollow, {
                 followerEmail: follower.email.toString(),
                 followeeEmail: followeeEmail.toString(),
             });
@@ -211,11 +188,7 @@ class UserCrudController {
             const session = neo.session()
 
             // get all friends of the current user
-            const result = await session.run(`
-            MATCH (user:User { email: $userEmail })
-            MATCH (user)-[:FRIENDS]->(friend:User)
-            RETURN friend
-          `, {
+            const result = await session.run(neo.getFriends, {
                 userEmail: currentUser.email.toString(),
             })
 
@@ -244,11 +217,7 @@ class UserCrudController {
             const session = neo.session()
 
             // get all followers of the current user
-            const result = await session.run(`
-            MATCH (user:User { email: $userEmail })
-            MATCH (follower:User)-[:FOLLOWS]->(user)
-            RETURN follower
-          `, {
+            const result = await session.run(neo.getFollowers, {
                 userEmail: currentUser.email.toString(),
             })
 
@@ -277,10 +246,7 @@ class UserCrudController {
             const currentUser = await this.model.findById(req.user._id);
 
             // find all users that the current user follows
-            const result = await session.run(`
-            MATCH (u:User { email: $email })-[:FOLLOWS]->(f:User)
-            RETURN f
-          `, {
+            const result = await session.run(neo.getFollowed, {
                 email: currentUser.email.toString(),
             });
 
@@ -317,14 +283,7 @@ class UserCrudController {
             // Open a Neo session
 
             // Create a new comment node and link it to the festival and user nodes
-            const result = await session.run(`
-            MATCH (f:Festival)
-            WHERE f.id = $festivalId
-            CREATE (c:Comment { id: $commentId, text: $commentText, createdAt: timestamp() })
-            CREATE (c)-[:COMMENTED_ON]->(f)
-            CREATE (c)-[:POSTED_BY]->(u:User { email: $email })
-            RETURN c
-        `, {
+            const result = await session.run(neo.addComment, {
                 festivalId: festivalId.toString(),
                 commentText: commentText.toString(),
                 email: currentUser.email.toString(),
@@ -357,14 +316,7 @@ class UserCrudController {
             const session = neo.session()
 
             // Create a new reply node and link it to the comment and user nodes
-            const result = await session.run(`
-            MATCH (c:Comment)
-            WHERE c.id = $commentId
-            CREATE (r:Reply { text: $replyText, createdAt: timestamp() })
-            CREATE (r)-[:REPLIED_TO]->(c)
-            CREATE (r)-[:POSTED_BY]->(u:User { email: $email })
-            RETURN r
-        `, {
+            const result = await session.run(neo.addReply, {
                 commentId: commentId.toString(),
                 replyText: replyText.toString(),
                 email: currentUser.email.toString(),
@@ -392,14 +344,7 @@ class UserCrudController {
             const festivalId = req.params.festivalId;
 
             // Get all comments on the festival and their corresponding replies
-            const result = await session.run(`
-            MATCH (f:Festival)
-            WHERE f.id = $festivalId
-            OPTIONAL MATCH (c:Comment)-[:COMMENTED_ON]->(f)
-            OPTIONAL MATCH (c)-[:REPLIED_TO]->(parent)
-            OPTIONAL MATCH (reply:Reply)-[:REPLIED_TO]->(c)
-            RETURN c, COLLECT(reply) AS replies
-            `, {
+            const result = await session.run(neo.getAllCommentsWithReplies, {
                 festivalId: festivalId.toString(),
             })
 

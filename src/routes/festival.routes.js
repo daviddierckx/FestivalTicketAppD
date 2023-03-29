@@ -25,6 +25,13 @@ router.put('/:id', FestivalCrudController.update)
 // remove a festival
 router.delete('/:id', FestivalCrudController.delete)
 
+// Route for getting festivals before a certain date
+router.get('/date/before', FestivalNeoCrudController.getFestivalsBeforeDate);
 
+// Route for getting festivals after a certain date
+router.get('/date/after', FestivalNeoCrudController.getFestivalsAfterDate);
+
+// Route for getting festivals to range from certain dates
+router.get('/date/range', FestivalNeoCrudController.getFestivalsByDateRange);
 
 module.exports = router
