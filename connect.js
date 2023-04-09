@@ -20,6 +20,15 @@ async function mongo(dbName) {
     }
 }
 
+async function mongoTest(dbName) {
+    try {
+        await mongoose.connect(`${process.env.MONGO_TEST_URL}`, options)
+        console.log(`connection to mongo DB ${dbName} established`)
+    } catch (err) {
+        console.error(err)
+    }
+}
+
 function neo(dbName) {
     try {
         neo_driver.connect(dbName)
@@ -29,9 +38,19 @@ function neo(dbName) {
     }
 }
 
+function neoTest(dbName) {
+    try {
+        neo_driver.connectTest(dbName)
+        console.log(`connection to neo DB ${dbName} established`)
+    } catch (err) {
+        console.error(err)
+    }
+}
 
 
 module.exports = {
     mongo,
+    mongoTest,
+    neoTest,
     neo,
 }

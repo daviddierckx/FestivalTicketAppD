@@ -8,6 +8,14 @@ function connect(dbName) {
     )
 }
 
+function connectTest(dbName) {
+    this.dbName = dbName
+    this.driver = neo4j.driver(
+        process.env.NEO4J_TEST_URL,
+        neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_TEST_PASSWORD)
+    )
+}
+
 function session() {
     return this.driver.session({
         database: this.dbName,
@@ -112,6 +120,7 @@ const createFestival = `
 
 module.exports = {
     connect,
+    connectTest,
     session,
     addUser: "CREATE (n:User {userName: $userName, email: $email})",
     addFriend,

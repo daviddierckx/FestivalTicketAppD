@@ -36,6 +36,7 @@ const ordersRoutes = require('./routes/order.routes')
 const authRoutes = require('./routes/auth')
 const refreshTokenRoutes = require('./routes/refreshToken')
 const userRoutes = require('./routes/user.routes')
+const commentRoutes = require('./routes/comment.routes')
 
 //TODO ROUTES
 const errors = require('./middleware/errors')
@@ -44,6 +45,7 @@ app.use('/artiesten', artiestenRoutes)
 app.use('/festivals', festivalsRoutes)
 app.use('/orders', ordersRoutes)
 app.use('/user', userRoutes)
+app.use('/user', commentRoutes)
 
 app.use('/api', authRoutes)
 app.use('/api/refreshToken', refreshTokenRoutes)

@@ -1,33 +1,96 @@
 const chai = require('chai')
 const expect = chai.expect
+const mongoose = require('mongoose');
+const UserModel = require('./user.model');
 
 var chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
 
-const User = require('./user.model')() // note we need to call the model caching function
+const Order = require('./order.schema')() // note we need to call the model caching function
 
-describe('user model', function () {
+describe('User model', function () {
     describe('unit tests', function () {
-        it('should reject a missing user name', async function () {
-            const user = new User({})
+        it('should require a user name', async () => {
+            const userData = {
+                email: 'testuserTEST@example.com',
+                password: 'Test@12345',
+                roles: ['user'],
+            };
 
-            await expect(user.save()).to.be.rejectedWith(Error)
-        })
+            const user = new UserModel(userData);
+            let err;
 
-        it('should an email', async function () {
-            const user = await new User({ name: 'Jane' }).save()
+            try {
+                await user.validate();
+            } catch (error) {
+                err = error;
+            }
 
-            expect(user).to.have.property('email').and.to.be.empty
-        })
+            expect(err).to.exist;
+            expect(err.errors.userName).to.exist;
+        });
 
-        it('should not create duplicate user names', async function () {
-            await new User({ name: 'Joe' }).save()
-            const user = new User({ name: 'Joe' })
+        it('should require an email', async () => {
+            const userData = {
+                userName: 'Test User',
+                password: 'Test@12345',
+                roles: ['user'],
+            };
 
-            await expect(user.save()).to.be.rejectedWith(Error)
+            const user = new UserModel(userData);
+            let err;
 
-            let count = await User.find().countDocuments()
-            expect(count).to.equal(1)
-        })
+            try {
+                await user.validate();
+            } catch (error) {
+                err = error;
+            }
+
+            expect(err).to.exist;
+            expect(err.errors.email).to.exist;
+        });
+
+        it('should require a password', async () => {
+            const userData = {
+                userName: 'Test User',
+                email: 'testuserTEST@example.com',
+                roles: ['user'],
+            };
+
+            const user = new UserModel(userData);
+            let err;
+
+            try {
+                await user.validate();
+            } catch (error) {
+                err = error;
+            }
+
+            expect(err).to.exist;
+            expect(err.errors.password).to.exist;
+        });
+
+
+
+        it('should only allow certain roles', async () => {
+            const userData = {
+                userName: 'Test User',
+                email: 'testuserTEST@example.com',
+                password: 'Test@12345',
+                roles: ['admin', 'super_admin', 'invalid_role'],
+            };
+
+            const user = new UserModel(userData);
+            let err;
+
+            try {
+                await user.validate();
+            } catch (error) {
+                err = error;
+            }
+
+            expect(err).to.exist;
+        });
+
     })
 })

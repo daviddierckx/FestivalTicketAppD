@@ -11,7 +11,6 @@ const UserSchema = new Schema({
     },
 
     // users email needs be a email
-    //TODO: Add email validation
     email: {
         type: String,
         required: [true, 'A user needs to have a Emailadress'],

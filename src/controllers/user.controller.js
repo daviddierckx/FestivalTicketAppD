@@ -369,6 +369,17 @@ class UserCrudController {
         }
     }
 
+    getCurrentUser = async (req, res, next) => {
+        try {
+            const user = await this.model.findById(req.user._id)
+            return user;
+
+        } catch (err) {
+            console.log(err)
+            res.status(500).json({ error: true, message: "Internal Server Error" })
+        }
+    }
+
 }
 
 module.exports = UserCrudController;
