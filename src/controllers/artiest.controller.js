@@ -6,7 +6,6 @@ class ArtiestCrudController {
         console.log(model);
         this.model = model
     }
-    //TODO
 
 
     async getAllArtiesten(sortField, sortOrder, filter) {

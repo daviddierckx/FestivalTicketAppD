@@ -23,7 +23,6 @@ function session() {
     })
 }
 
-//TODO test
 const addFriend = `
 MATCH (sender:User { email: $senderEmail })
 MATCH (receiver:User { email: $receiverEmail })
@@ -59,7 +58,6 @@ MATCH (follower:User { email: $followerEmail })-[r:FOLLOWS]->(followee:User { em
 DELETE r
 RETURN count(r)
 `
-//TODO
 const deleteFriend = `
 MATCH (u1:User { email: $email1 })-[r1:FRIEND]->(u2:User { email: $email2 })
 MATCH (u2)-[r2:FRIEND]->(u1)

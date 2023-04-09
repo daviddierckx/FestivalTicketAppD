@@ -10,7 +10,7 @@ const User = require('../models/user.model');
 const Festival = require('../models/festival.schema')() // note we need to call the model caching function
 chai.use(chaiHttp);
 
-describe('Artiest endpoints', function () {
+describe('Festival endpoints', function () {
 
     let authToken;
     let id;

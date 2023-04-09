@@ -16,7 +16,6 @@ class FestivalCrudController {
         console.log(entity);
 
         // Create a festival node in Neo4j
-        //TODO test
         const neoQuery = neo.createFestival
         const neoParams = {
             Naam: entity.Naam,

@@ -18,7 +18,6 @@ class UserCrudController {
             const session = neo.session()
 
             // create a new friend request relationship between existing nodes
-            //TODO test
             const result = await session.run(neo.addFriend, {
                 senderEmail: sender.email.toString(),
                 receiverEmail: receiverEmail.toString(),
@@ -98,7 +97,6 @@ class UserCrudController {
             const session = neo.session()
 
             // check if the relationship already exists
-            //TODO test
             const result = await session.run(neo.followFriend, {
                 followerEmail: follower.email.toString(),
                 followeeEmail: followeeEmail.toString(),
@@ -119,7 +117,6 @@ class UserCrudController {
             }
 
             // create a new follows relationship between existing nodes
-            //todo test
             await session.run(neo.followee, {
                 followerEmail: follower.email.toString(),
                 followeeEmail: followeeEmail.toString(),

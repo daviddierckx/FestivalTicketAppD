@@ -38,7 +38,6 @@ const refreshTokenRoutes = require('./routes/refreshToken')
 const userRoutes = require('./routes/user.routes')
 const commentRoutes = require('./routes/comment.routes')
 
-//TODO ROUTES
 const errors = require('./middleware/errors')
 
 app.use('/artiesten', artiestenRoutes)

@@ -29,7 +29,6 @@ router.delete('/:id', ArtiestCrudController.delete)
 
 // Definieer de route voor het ophalen van artiesten op basis van verschillende criteria met behulp van aggregate pipeline
 // route to get all artiesten
-//TODO
 router.get('/', async (req, res, next) => {
     try {
         // get query params for sorting and filtering
