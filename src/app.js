@@ -44,7 +44,7 @@ app.use('/artiesten', artiestenRoutes)
 app.use('/festivals', festivalsRoutes)
 app.use('/orders', ordersRoutes)
 app.use('/user', userRoutes)
-app.use('/user', commentRoutes)
+// app.use('/user', commentRoutes)
 
 app.use('/api', authRoutes)
 app.use('/api/refreshToken', refreshTokenRoutes)

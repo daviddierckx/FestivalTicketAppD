@@ -17,6 +17,30 @@ describe('Integration Tests', () => {
 
     let id;
 
+    let authToken;
+
+    // login and get auth token before running tests
+
+    before(async function () {
+
+
+        // increase the timeout for this hook to 5000ms
+        this.timeout(5000);
+        try {
+            // make login request and get auth token
+            const res = await requester.post('/api/login').send({
+                email:
+                    "testuser@example.com",
+                password:
+                    "Test@12345"
+            });
+            authToken = res.body.accessToken;
+        } catch (error) {
+            console.error(error);
+        }
+    });
+
+
     before(async () => {
         // Remove all users before running the tests
         await User.deleteOne({ email: "testuserTEST@example.com" })
@@ -72,7 +96,18 @@ describe('Integration Tests', () => {
             expect(response.body).to.be.empty;
         });
     });
+    // // test GET /friends route
+    // describe('GET /friends', () => {
+    //     it('should get all friends', async () => {
+    //         const res = await requester.get
+    //             ('user/friends').set('x-access-token', authToken)
 
+
+    //         expect(res).to.have.status(200);
+    //         console.log(res.body);
+
+    //     });
+    // });
 
 
 })

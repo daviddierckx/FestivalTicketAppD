@@ -1,6 +1,7 @@
 const errors = require("../middleware/errors")
 const neo = require('../../neo')
 const uuid = require('uuid');
+const User = require("../models/user.model");
 
 // the schema is supplied by injection
 class UserCrudController {
@@ -231,6 +232,38 @@ class UserCrudController {
         } catch (err) {
             console.log(err)
             res.status(500).json({ error: true, message: "Internal Server Error" })
+        }
+    }
+    // get all users
+    getAllUsers = async (req, res) => {
+        try {
+            const users = await User.find({});
+            res.status(200).json({
+                error: false,
+                message: 'All users retrieved successfully',
+                data: users,
+            });
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ error: true, message: 'Internal Server Error' });
+        }
+    }
+
+    // get one users
+    getOneUsers = async (req, res) => {
+        try {
+            const user = await User.findById(req.params.id);
+            if (!user) {
+                return res.status(404).json({ error: true, message: 'User not found' });
+            }
+            res.status(200).json({
+                error: false,
+                message: 'User retrieved successfully',
+                user,
+            });
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ error: true, message: 'Internal Server Error' });
         }
     }
 

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "nodemon server.js",
-    "test": "mocha --watch \"./**/*spec.js\" --reporter min"
+    "test": "mocha  \"./**/*spec.js\" --reporter min --exit"
   },
   "repository": {
     "type": "git",

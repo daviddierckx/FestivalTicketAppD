@@ -10,11 +10,8 @@ const UserSimpleCrudController = new UserSimpleController(User)
 
 const auth = require("../middleware/auth")
 
-// get all users
-router.get('/', UserSimpleCrudController.getAll)
-
 // get a users
-router.get('/:id', UserSimpleCrudController.getOne)
+router.get('/', UserCrudController.getAllUsers)
 
 // update a user
 router.put('/:id', UserSimpleCrudController.update)
